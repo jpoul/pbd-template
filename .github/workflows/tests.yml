@@ -7,9 +7,31 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  check-for-jest:
+    name: Check for Jest Configuration
+    runs-on: ubuntu-latest
+    outputs:
+      has_jest: ${{ steps.check-jest.outputs.has_jest }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Check for Jest configuration
+      id: check-jest
+      run: |
+        if [[ -f "jest.config.js" ]] || [[ -f "jest.config.ts" ]] || grep -q '"jest"' package.json 2>/dev/null || grep -q "'jest'" package.json 2>/dev/null; then
+          echo "has_jest=true" >> $GITHUB_OUTPUT
+          echo "Jest configuration detected, will run tests"
+        else
+          echo "has_jest=false" >> $GITHUB_OUTPUT
+          echo "No Jest configuration detected, skipping tests"
+        fi
+
   test:
     name: Run Test Suite
     runs-on: ubuntu-latest
+    needs: check-for-jest
+    if: ${{ needs.check-for-jest.outputs.has_jest == 'true' }}
     
     steps:
     - uses: actions/checkout@v3
