@@ -1,0 +1,78 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run tests
+      run: npm test
+      
+    - name: Generate coverage report
+      run: npm run test:coverage
+      
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        
+    - name: Check test coverage thresholds
+      run: |
+        COVERAGE=$(cat coverage/coverage-summary.json | jq -r '.total.lines.pct')
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "Test coverage is below threshold: $COVERAGE%"
+          exit 1
+        else
+          echo "Test coverage is acceptable: $COVERAGE%"
+        fi
+      
+    - name: Comment PR with test results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const testResults = fs.readFileSync('test-results.json', 'utf8');
+          const results = JSON.parse(testResults);
+          
+          const totalTests = results.numTotalTests;
+          const passedTests = results.numPassedTests;
+          const failedTests = results.numFailedTests;
+          
+          const body = `### Test Results
+          
+          - Total Tests: ${totalTests}
+          - Passed Tests: ${passedTests}
+          - Failed Tests: ${failedTests}
+          - Coverage: ${process.env.COVERAGE}%
+          
+          ${failedTests > 0 ? '❌ Some tests are failing' : '✅ All tests passed'}`;
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });
+      env:
+        COVERAGE: ${{ env.COVERAGE }}
+
+# Note: Customize this workflow file based on your project's testing framework and needs

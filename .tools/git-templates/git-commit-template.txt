@@ -1,0 +1,20 @@
+[[PROJECT]-X.Y.Z] Short descriptive title
+
+# Detailed description of changes (what and why)
+- 
+- 
+- 
+
+# Reference
+Task: [PROJECT]-X.Y.Z
+Prompt: X.Y
+Tests: [number] new/modified, all passing
+Coverage: X%
+
+# --- TEMPLATE INSTRUCTIONS ---
+# 1. Replace [PROJECT]-X.Y.Z with actual task ID from todo.md
+# 2. Write a short descriptive title (50 chars or less)
+# 3. Add bullet points explaining what changed and why
+# 4. Update the Reference section with actual numbers
+# 5. Delete these instructions and any unused sections
+# ----------------------------------

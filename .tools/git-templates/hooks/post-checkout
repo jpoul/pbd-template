@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Post-checkout hook to facilitate TDD workflow
+PREV_HEAD=$1
+NEW_HEAD=$2
+BRANCH_CHECKOUT=$3
+
+# Only run on branch checkout, not file checkout
+if [ $BRANCH_CHECKOUT -ne 1 ]; then
+  exit 0
+fi
+
+# Get current branch name
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+
+# Check if this is a feature branch
+if [[ $BRANCH_NAME == feature/* ]]; then
+  # Extract task ID from branch name (format: feature/PROJECT-X.Y.Z-description)
+  TASK_ID=$(echo $BRANCH_NAME | grep -oE '\w+-[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+  
+  if [ ! -z "$TASK_ID" ]; then
+    echo "🔍 Working on task: $TASK_ID"
+    
+    # Find the task in todo.md
+    if [ -f "todo.md" ]; then
+      TASK_LINE=$(grep -n "$TASK_ID" todo.md | cut -d: -f1)
+      if [ ! -z "$TASK_LINE" ]; then
+        echo "📋 Task details from todo.md:"
+        # Display a few lines after the task ID for context
+        head -n $((TASK_LINE + 6)) todo.md | tail -n 7 | sed 's/^/    /'
+      fi
+    fi
+    
+    echo ""
+    echo "🧪 TDD Workflow Reminder:"
+    echo "  1. Write tests first"
+    echo "  2. Ensure tests fail for the right reason"
+    echo "  3. Implement code to make tests pass"
+    echo "  4. Refactor while keeping tests passing"
+    echo ""
+    echo "📝 Remember to use the correct task reference format in commits:"
+    echo "  [$TASK_ID] Brief description of changes"
+    echo ""
+  fi
+  
+  # Check if there are any relevant prompt files
+  if [ -d "docs/prompts" ]; then
+    PROMPT_FILES=$(find docs/prompts -name "*${TASK_ID}*" -type f)
+    if [ ! -z "$PROMPT_FILES" ]; then
+      echo "📄 Found related prompt files:"
+      echo "$PROMPT_FILES" | sed 's/^/    /'
+      echo ""
+    fi
+  fi
+  
+  # Install dependencies if needed
+  if [ -f "package.json" ] && [ ! -d "node_modules" ]; then
+    echo "📦 Missing node_modules detected. Install dependencies? (y/n)"
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      npm install
+    fi
+  fi
+fi
+
+exit 0

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Post-commit hook to automatically update todo.md based on commit messages
+
+# Get the commit message of the most recent commit
+COMMIT_MSG=$(git log -1 --pretty=%B)
+
+# Check if the commit message contains a task reference
+if [[ $COMMIT_MSG =~ \[.*-[0-9]+\.[0-9]+\.[0-9]+\] ]]; then
+  # Run the todo update script
+  echo "Task reference detected in commit message. Running todo update script..."
+  ./.tools/git-templates/update-todo.sh
+fi
+
+exit 0

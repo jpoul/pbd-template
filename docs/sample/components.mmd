@@ -1,0 +1,64 @@
+flowchart TD
+    User([User]) <--> FE[React Frontend]
+    FE <--> FA[Firebase Auth]
+    FE <--> FS[Firebase Firestore]
+    FE <--> FF[Firebase Functions]
+    
+    subgraph "Frontend Components"
+        App[App Component]
+        Router[React Router]
+        App --> Router
+        Router --> AuthPages[Authentication Pages]
+        Router --> TodoPages[Todo Pages]
+        Router --> SettingsPage[Settings Page]
+        
+        subgraph "Authentication Pages"
+            Login[Login Page]
+            Register[Register Page]
+            Reset[Password Reset]
+            Profile[User Profile]
+        end
+        
+        subgraph "Todo Pages"
+            TodoList[Todo List View]
+            TodoCalendar[Calendar View]
+            TodoDetail[Todo Detail]
+            TodoForm[Todo Form]
+            
+            TodoList --> TodoDetail
+            TodoCalendar --> TodoDetail
+            TodoList --> TodoForm
+            TodoDetail --> TodoForm
+        end
+    end
+    
+    subgraph "Core Services"
+        AuthService[Authentication Service]
+        TodoService[Todo Service]
+        CategoryService[Category Service]
+        NotificationService[Notification Service]
+    end
+    
+    subgraph "Firebase Services"
+        FA[Authentication]
+        FS[Firestore]
+        FF[Cloud Functions]
+        FCM[Cloud Messaging]
+    end
+    
+    AuthPages <--> AuthService
+    TodoPages <--> TodoService
+    TodoPages <--> CategoryService
+    SettingsPage <--> AuthService
+    
+    AuthService <--> FA
+    TodoService <--> FS
+    CategoryService <--> FS
+    NotificationService <--> FCM
+    NotificationService <--> FF
+    
+    style FE fill:#61dafb,stroke:#61dafb,color:#000
+    style FA fill:#ffca28,stroke:#ffca28
+    style FS fill:#ffca28,stroke:#ffca28
+    style FF fill:#ffca28,stroke:#ffca28
+    style FCM fill:#ffca28,stroke:#ffca28
