@@ -9,54 +9,63 @@ if git rev-parse -q --verify MERGE_HEAD || [[ -f .git/MERGE_HEAD ]]; then
     exit 0
 fi
 
-# Stash unstaged changes
-git stash -q --keep-index
+# Check if Jest configuration exists
+if [[ -f "jest.config.js" ]] || [[ -f "jest.config.ts" ]] || grep -q '"jest"' package.json || grep -q "'jest'" package.json; then
+    # Jest configuration found, proceed with tests
+    echo "🔍 Jest configuration detected, proceeding with tests..."
+    
+    # Stash unstaged changes
+    git stash -q --keep-index
 
-# Run tests
-echo "🧪 Running tests..."
-npm test
-TEST_STATUS=$?
+    # Run tests
+    echo "🧪 Running tests..."
+    npm test
+    TEST_STATUS=$?
 
-# Check test coverage
-if [ $TEST_STATUS -eq 0 ]; then
-    echo "📊 Checking test coverage..."
-    npm run test:coverage
-    COVERAGE_STATUS=$?
-else
-    COVERAGE_STATUS=1
-fi
-
-# Restore unstaged changes
-git stash pop -q
-
-# If tests failed, prevent commit
-if [ $TEST_STATUS -ne 0 ]; then
-    echo "❌ Tests failed! Commit aborted."
-    echo "🔍 Please fix the failing tests before committing."
-    exit 1
-fi
-
-# If coverage is below threshold, prevent commit
-if [ $COVERAGE_STATUS -ne 0 ]; then
-    echo "❌ Test coverage below threshold! Commit aborted."
-    echo "🔍 Please ensure sufficient test coverage before committing."
-    exit 1
-fi
-
-# Check if TDD pattern is followed (test files modified before implementation)
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.tsx?$')
-for FILE in $STAGED_FILES; do
-    # If it's an implementation file, check if corresponding test exists and was modified
-    if [[ ! $FILE =~ \.test\.|\.spec\. ]]; then
-        TEST_FILE=${FILE/.ts/.test.ts}
-        TEST_FILE=${TEST_FILE/.tsx/.test.tsx}
-        
-        # If test file exists but wasn't modified in this commit
-        if [ -f "$TEST_FILE" ] && ! git diff --cached --name-only | grep -q "$TEST_FILE"; then
-            echo "⚠️ Warning: Modifying $FILE without updating its tests may break TDD principles."
-        fi
+    # Check test coverage
+    if [ $TEST_STATUS -eq 0 ]; then
+        echo "📊 Checking test coverage..."
+        npm run test:coverage
+        COVERAGE_STATUS=$?
+    else
+        COVERAGE_STATUS=1
     fi
-done
 
-echo "✅ All TDD checks passed! Proceeding with commit."
+    # Restore unstaged changes
+    git stash pop -q
+
+    # If tests failed, prevent commit
+    if [ $TEST_STATUS -ne 0 ]; then
+        echo "❌ Tests failed! Commit aborted."
+        echo "🔍 Please fix the failing tests before committing."
+        exit 1
+    fi
+
+    # If coverage is below threshold, prevent commit
+    if [ $COVERAGE_STATUS -ne 0 ]; then
+        echo "❌ Test coverage below threshold! Commit aborted."
+        echo "🔍 Please ensure sufficient test coverage before committing."
+        exit 1
+    fi
+
+    # Check if TDD pattern is followed (test files modified before implementation)
+    STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.tsx?$')
+    for FILE in $STAGED_FILES; do
+        # If it's an implementation file, check if corresponding test exists and was modified
+        if [[ ! $FILE =~ \.test\.|\.spec\. ]]; then
+            TEST_FILE=${FILE/.ts/.test.ts}
+            TEST_FILE=${TEST_FILE/.tsx/.test.tsx}
+            
+            # If test file exists but wasn't modified in this commit
+            if [ -f "$TEST_FILE" ] && ! git diff --cached --name-only | grep -q "$TEST_FILE"; then
+                echo "⚠️ Warning: Modifying $FILE without updating its tests may break TDD principles."
+            fi
+        fi
+    done
+
+    echo "✅ All TDD checks passed! Proceeding with commit."
+else
+    echo "⏩ No Jest configuration detected, skipping tests"
+fi
+
 exit 0
