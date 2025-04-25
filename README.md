@@ -1,5 +1,7 @@
 # Prompt-Based Development Template
 
+Inspired by [Harper Reed's LLM codegen workflow atm](https://harper.blog/2025/02/16/my-llm-codegen-workflow-atm)
+
 This template provides a foundation for projects that use AI prompts and Test-Driven Development (TDD) to build software systematically. It includes directory structures, Git workflows, and documentation templates designed to optimize the development process when working with language models.
 
 ## Getting Started
