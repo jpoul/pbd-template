@@ -27,7 +27,23 @@ The setup script will:
 - Replace placeholder values with your project ID
 - Initialize git repository (if needed)
 - Install git hooks for TDD workflow
+- Optionally install GitHub CLI for easier issue and PR management
 - Create an initial commit
+
+### Command-line Options
+
+For automated setups, you can use these command-line options:
+
+```bash
+# Skip GitHub CLI installation
+./.tools/setup.sh your-project-id --skip-gh-cli
+
+# Specify project ID with a named parameter
+./.tools/setup.sh --project-id your-project-id
+
+# Combine options
+./.tools/setup.sh --project-id your-project-id --skip-gh-cli
+```
 
 ### Git Hooks
 
