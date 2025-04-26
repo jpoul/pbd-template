@@ -1,25 +1,26 @@
 # Prompt-Based Development Template
 
-Inspired by [Harper Reed's LLM codegen workflow atm](https://harper.blog/2025/02/16/my-llm-codegen-workflow-atm)
+This template provides a foundation for projects that use AI prompts and Test-Driven Development (TDD) to build software systematically. It integrates Git workflows, testing frameworks, and documentation templates designed to optimize development when working with language models.
 
-This template provides a foundation for projects that use AI prompts and Test-Driven Development (TDD) to build software systematically. It includes directory structures, Git workflows, and documentation templates designed to optimize the development process when working with language models.
+Inspired by [Harper Reed's LLM codegen workflow](https://harper.blog/2025/02/16/my-llm-codegen-workflow-atm)
 
-## Getting Started
+## Quick Start
 
-1. Create a new repository from this template
-2. Replace `[PROJECT]` with your project identifier throughout the files
-3. Set up the Git workflow by following the instructions in `.tools/git-templates/git_workflow.md`
-4. Customize the directory structure as needed for your specific project
+Run the setup script to configure your project:
 
-## Directory Structure
+```bash
+# On macOS/Linux or Git Bash on Windows
+./.tools/setup.sh your-project-id
 
-- `.github/` - GitHub-specific files
-  - `workflows/` - GitHub Actions workflow configurations
-  - `PULL_REQUEST_TEMPLATE/` - PR templates for GitHub
-- `.tools/` - Development tools and utilities
-  - `git-templates/` - Git workflow templates and hooks
-- `docs/` - Project documentation
-  - `prompts/` - AI prompts used to guide development
+# Or with PowerShell on Windows
+& 'C:\Program Files\Git\bin\bash.exe' -c './.tools/setup.sh your-project-id'
+```
+
+The setup script will:
+- Replace placeholder values with your project ID
+- Initialize git repository (if needed)
+- Install git hooks for TDD workflow
+- Create an initial commit
 
 ## Workflow Overview
 
@@ -29,60 +30,44 @@ This template implements a prompt-based development workflow that:
 2. Uses a TDD approach (write tests first, then implementation)
 3. Leverages AI prompts for consistent, step-by-step development
 4. Maintains traceability between code changes and task IDs
-5. Integrates with GitHub for project management
 
-## Setting Up Git Hooks
+## Directory Structure
 
-### On Windows:
+- `.github/` - GitHub Actions workflows and PR templates
+- `.tools/` - Development tools, setup scripts, and Git hooks
+- `docs/` - Project documentation and AI prompts
+  - `prompts/` - AI prompts used to guide development
+  - `sample/` - Example artifacts and templates
 
-Our Git hooks and scripts are written in Bash. To use them on Windows:
+## Git Hooks
 
-1. **Use Git Bash** (Recommended):
-   ```bash
-   # Open Git Bash in your project directory
-   cd your-project
-   # Make the script executable
-   chmod +x .tools/git-templates/install-hooks.sh
-   # Run the installation script
-   ./.tools/git-templates/install-hooks.sh
-   ```
+Our Git hooks enforce TDD principles and consistent commit messages. They will:
 
-2. **Alternative: Windows Subsystem for Linux (WSL)**:
-   ```bash
-   wsl
-   cd /mnt/c/path/to/your/project
-   chmod +x .tools/git-templates/install-hooks.sh
-   ./.tools/git-templates/install-hooks.sh
-   ```
+- Run tests before allowing commits (when Jest is configured)
+- Check test coverage thresholds
+- Validate commit message formats
+- Ensure test files are updated with implementation changes
 
-3. **Alternative: PowerShell with Git for Windows**:
-   ```powershell
-   # Run this in PowerShell
-   & 'C:\Program Files\Git\bin\bash.exe' -c './.tools/git-templates/install-hooks.sh'
-   ```
-
-### On macOS/Linux:
+If you need to reinstall the hooks manually:
 
 ```bash
-# Make the script executable
 chmod +x .tools/git-templates/install-hooks.sh
-# Run the installation script
 ./.tools/git-templates/install-hooks.sh
 ```
 
 ## Documentation
 
-- `.tools/git-templates/git_workflow.md` - Details on the Git workflow strategy
-- `docs/prompts/README.md` - Guide to creating effective prompts for development
+- [Git workflow strategy](.tools/git-templates/git_workflow.md) - Details on the Git workflow strategy
+- [Guide to creating prompts](docs/prompts/README.md) - Guide to creating effective prompts for development
+- [Process Guide](docs/process-guide.md) - Complete process for prompt-based development from idea to implementation
+- [Todo Template](docs/todo-template.md) - Template for structuring development tasks
 
-## How to Customize
+## Customizing for Your Project
 
-To adapt this template for your project:
-
-1. Define your task structure in a `todo.md` file
-2. Create project-specific prompts in `docs/prompts/`
-3. Set up your test framework following the TDD principles
-4. Configure GitHub Actions for your CI/CD needs
+1. Define your task structure in a `todo.md` file using the [Todo Template](docs/todo-template.md)
+2. Create project-specific prompts in `docs/prompts/` following the [prompts guide](docs/prompts/README.md)
+3. Configure your test framework (the template works with Jest)
+4. Adjust GitHub Actions workflows as needed
 
 ## License
 
