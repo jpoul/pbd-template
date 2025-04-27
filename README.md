@@ -4,14 +4,18 @@ Inspired by [Harper Reed's LLM codegen workflow](https://harper.blog/2025/02/16/
 
 This template provides a foundation for projects that use AI prompts and Test-Driven Development (TDD) to build software systematically. It integrates Git workflows, testing frameworks, and documentation templates designed to optimize development when working with language models.
 
-The Prompt-Based Development workflow:
+## Getting Started
 
-1. Breaks down projects into clear, testable tasks with unique IDs
-2. Uses a TDD approach (write tests first, then implementation)
-3. Leverages AI prompts for consistent, step-by-step development
-4. Maintains traceability between code changes and task IDs
+The repository includes the following folders:
 
-## Repository Setup
+- `.github/` - GitHub Actions workflows and PR templates
+- `.tools/` - Development tools, setup scripts, and Git hooks
+- `docs/` - Your project documentation
+- `docs/pbd/` - Prompt-Based Development methodology documentation
+  - `docs/pbd/README.md` - Comprehensive PBD process guide
+  - `docs/pbd/sample/` - Sample artifacts from a Todo App development cycle
+
+### Repository Setup
 
 Run the setup script to configure your project:
 
@@ -30,7 +34,9 @@ The setup script will:
 - Optionally install GitHub CLI for easier issue and PR management
 - Create an initial commit
 
-### Command-line Options
+[Read the documentation](.tools/git-templates/git_workflow.md) on the Git workflow strategy that integrates with the prompt-based development process.
+
+#### Command-line Options
 
 For automated setups, you can use these command-line options:
 
@@ -45,7 +51,7 @@ For automated setups, you can use these command-line options:
 ./.tools/setup.sh --project-id your-project-id --skip-gh-cli
 ```
 
-### Git Hooks
+#### Git Hooks
 
 Our Git hooks enforce TDD principles and consistent commit messages. They will:
 
@@ -61,36 +67,24 @@ chmod +x .tools/git-templates/install-hooks.sh
 ./.tools/git-templates/install-hooks.sh
 ```
 
-## Directory Structure
+### Prompt-Based Development Process
 
-- `.github/` - GitHub Actions workflows and PR templates
-- `.tools/` - Development tools, setup scripts, and Git hooks
-- `docs/` - Project documentation
-  - `sample/` - Example artifacts and templates showing the development flow
+To learn how to use the prompt-based development methodology, review the [PBD Process Guide](/docs/pbd/README.md). This guide explains:
 
-## Getting Started
+- The complete development workflow from idea to implementation
+- How to create specifications, blueprints, and task breakdowns
+- Sample prompts for each stage of development
+- TDD principles and Git workflow integration
 
-To get started with your project, refer to these resources:
+## Sample Project Artifacts
 
-### [Process Guide](docs/process-guide.md)
-This comprehensive guide explains the entire prompt-based development process from initial idea to implementation, including:
-- Specification Creation
-- Blueprint Development
-- Task Breakdown
-- Implementation and TDD practices
+Examine the [sample artifacts](/docs/pbd/sample/) to see a complete prompt-based development cycle for a Todo Application:
 
-### [Git Workflow Strategy](.tools/git-templates/git_workflow.md)
-Documentation on the Git workflow strategy that integrates with the prompt-based development process.
-
-## Sample Outcome
-
-The `docs/sample/` directory contains example artifacts from a complete prompt-based development cycle for a Todo Application project. This sample demonstrates how the development process flows from idea to implementation:
-
-- `spec.md` - Initial project specification for the Todo App
-- `blueprint.md` - Architectural blueprint breaking down the application components
-- `components.mmd` - Component diagram showing the application structure
-- `prompt_plan.md` - Sample prompting plan for implementing the Todo App
-- `todo.md` - Task breakdown with unique identifiers following TDD principles
+- `spec.md` - Initial project specification
+- `blueprint.md` - Technical implementation blueprint
+- `components.mmd` - Component diagram
+- `prompt_plan.md` - Implementation prompt plan
+- `todo.md` - Task breakdown with unique identifiers
 
 ## License
 
