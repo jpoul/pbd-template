@@ -274,7 +274,7 @@ The final planning step is to convert the prompt plan into actionable tasks with
 I need to convert the prompt plan I'll share with you into a structured task list for implementation. Please create a todo.md file with the following:
 
 1. Break down each prompt in the plan into one or more specific tasks
-2. Assign each task a unique identifier using the format [PROJECT]-X.Y.Z where:
+2. Assign each task a unique identifier using the format zeno-X.Y.Z where:
    - X is the major component number
    - Y is the subcomponent number
    - Z is the task number

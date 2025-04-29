@@ -1,13 +1,12 @@
 #!/bin/bash
 
 # Automated Todo Update Script
-# This script updates todo.md by marking tasks as complete based on commit messages
-# It can be run manually or integrated with git hooks
+# This script updates todo.md by marking tasks as complete based on the current commit message
+# It also marks all related subtasks as complete
+# It stages the updated todo.md file so it is included in the commit
 
-echo "🔍 Checking for tasks to mark as complete..."
-
-# Path to the todo file - can be changed if needed
-TODO_FILE="todo.md"
+# Path to the todo file
+TODO_FILE="docs/specification/todo.md"
 
 # Check if todo file exists
 if [ ! -f "$TODO_FILE" ]; then
@@ -15,70 +14,98 @@ if [ ! -f "$TODO_FILE" ]; then
   exit 1
 fi
 
-# Get recent commits that haven't been processed yet
-# We use a marker file to track the last processed commit
-MARKER_FILE=".todo-marker"
-LAST_PROCESSED_COMMIT=""
-
-if [ -f "$MARKER_FILE" ]; then
-  LAST_PROCESSED_COMMIT=$(cat "$MARKER_FILE")
+# Get the commit message from the argument
+if [ -z "$1" ]; then
+  echo "❌ Error: Commit message not provided"
+  echo "Usage: $0 \"<commit message>\""
+  exit 1
 fi
 
-# If we have a marker, get commits since then, otherwise limit to last 10
-if [ -n "$LAST_PROCESSED_COMMIT" ]; then
-  COMMITS=$(git log --pretty=format:"%H %s" $LAST_PROCESSED_COMMIT..HEAD)
-else
-  COMMITS=$(git log --pretty=format:"%H %s" -10)
-fi
+COMMIT_MSG="$1"
+echo "🔍 Processing commit message: $COMMIT_MSG"
 
-# If no new commits, exit
-if [ -z "$COMMITS" ]; then
-  echo "✅ No new commits to process"
-  exit 0
-fi
+# Extract task ID from commit message (format: [ANY-X.Y.Z])
+if [[ $COMMIT_MSG =~ \[([A-Za-z]+-[0-9]+\.[0-9]+\.[0-9]+)\] ]]; then
+  TASK_ID="${BASH_REMATCH[1]}"
+  TASK_ID_UPPER=$(echo "$TASK_ID" | tr '[:lower:]' '[:upper:]')
+  echo "📝 Found task reference: $TASK_ID_UPPER"
 
-# Keep track of the most recent commit
-MOST_RECENT_COMMIT=$(echo "$COMMITS" | head -n 1 | cut -d' ' -f1)
-
-# Counter for tasks marked as complete
-TASKS_UPDATED=0
-
-# Process each commit
-echo "$COMMITS" | while read -r COMMIT_HASH COMMIT_MSG; do
-  # Extract task ID from commit message (format: [PROJECT-X.Y.Z])
-  if [[ $COMMIT_MSG =~ \[(.*?-[0-9]+\.[0-9]+\.[0-9]+)\] ]]; then
-    TASK_ID="${BASH_REMATCH[1]}"
-    echo "📝 Found task reference: $TASK_ID"
-    
-    # Escape special characters for sed
-    ESCAPED_TASK_ID=$(echo "$TASK_ID" | sed 's/[\/&]/\\&/g')
-    
-    # Look for the task in todo.md and mark it as complete if it's not already
-    # We're looking for lines like: - [ ] **TASK-1.2.3** Task description
-    if grep -q "\- \[ \] \*\*$TASK_ID\*\*" "$TODO_FILE"; then
-      sed -i "s/- \[ \] \*\*$ESCAPED_TASK_ID\*\*/- \[x\] \*\*$ESCAPED_TASK_ID\*\*/g" "$TODO_FILE"
-      echo "✅ Marked task $TASK_ID as complete"
-      ((TASKS_UPDATED++))
-    else
-      # If we didn't find an exact match, it might be either already complete or have
-      # a different format, so let's just inform the user
-      if grep -q "\*\*$TASK_ID\*\*" "$TODO_FILE"; then
-        echo "ℹ️ Task $TASK_ID already found in todo.md (might already be complete)"
+  # Create temporary file
+  TEMP_FILE="${TODO_FILE}.tmp"
+  > "$TEMP_FILE" # Ensure temp file is empty
+  
+  # Flag to track if we found the task and if we're in its subtasks
+  FOUND_TASK=0
+  IN_SUBTASKS=0
+  
+  # Counter for tasks updated
+  TASKS_UPDATED=0
+  
+  # Read the todo file line by line
+  while IFS= read -r line || [ -n "$line" ]; do
+    # Check if this is the main task line
+    if [[ "$line" == *"**${TASK_ID_UPPER}**"* ]]; then
+      FOUND_TASK=1
+      IN_SUBTASKS=1
+      
+      # If the main task is not complete, mark it complete
+      if [[ "$line" == *"- [ ]"* ]]; then
+        line=$(echo "$line" | sed 's/- \[ \]/- [x]/')
+        TASKS_UPDATED=$((TASKS_UPDATED+1))
+        echo "✅ Marked main task $TASK_ID_UPPER as complete"
       else
-        echo "⚠️ Task $TASK_ID not found in todo.md"
+        echo "ℹ️ Main task $TASK_ID_UPPER already complete, checking subtasks..."
       fi
+      
+      # Write the processed line to the temp file
+      echo "$line" >> "$TEMP_FILE"
+    
+    # Check if we're processing subtasks of the found task
+    elif [[ $IN_SUBTASKS -eq 1 ]]; then
+      # Check if this line is a subtask (indented and has a checkbox)
+      if [[ "$line" == *"  - [ ]"* ]]; then
+        # This is an unchecked subtask, mark it complete
+        line=$(echo "$line" | sed 's/- \[ \]/- [x]/')
+        TASKS_UPDATED=$((TASKS_UPDATED+1))
+        echo "✅ Marked subtask as complete"
+      
+      # Check if we've reached the next main task (non-indented and starts with dash)
+      elif [[ "$line" =~ ^"- " ]]; then
+        # End of subtask section
+        IN_SUBTASKS=0
+      fi
+      
+      # Write the processed line to the temp file
+      echo "$line" >> "$TEMP_FILE"
+    
+    # All other lines are unchanged
+    else
+      echo "$line" >> "$TEMP_FILE"
+    fi
+  done < "$TODO_FILE"
+  
+  # Replace original file if any tasks were updated
+  if [[ $TASKS_UPDATED -gt 0 ]]; then
+    cp "$TEMP_FILE" "$TODO_FILE"
+    echo "🎉 Successfully updated $TASKS_UPDATED tasks in $TODO_FILE"
+    
+    # Stage the updated todo file
+    git add "$TODO_FILE"
+    echo "✅ Staged updated $TODO_FILE"
+  else
+    if [[ $FOUND_TASK -eq 1 ]]; then
+      echo "ℹ️ Task $TASK_ID_UPPER and all its subtasks are already complete"
+    else
+      echo "⚠️ Task $TASK_ID_UPPER not found in $TODO_FILE"
     fi
   fi
-done
+  
+  # Clean up temp file
+  rm -f "$TEMP_FILE"
 
-# Update the marker to the most recent commit
-echo "$MOST_RECENT_COMMIT" > "$MARKER_FILE"
-
-# Summary
-if [ $TASKS_UPDATED -gt 0 ]; then
-  echo "🎉 Successfully updated $TASKS_UPDATED tasks in $TODO_FILE"
 else
-  echo "ℹ️ No tasks were updated in $TODO_FILE"
+  echo "❌ No task ID found in commit message: $COMMIT_MSG"
+  exit 1
 fi
 
 exit 0

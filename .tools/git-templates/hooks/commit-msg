@@ -1,54 +1,30 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Commit message hook to enforce task reference format
+# Commit message hook to enforce format: [PREFIX-X.Y.Z] Description
+
+# Make sure we're running in bash
+if [ -z "$BASH" ]; then
+  exec bash "$0" "$@"
+  exit $?
+fi
+
 COMMIT_MSG_FILE=$1
-COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+# Read the first line of commit message only and strip carriage returns
+COMMIT_MSG=$(head -n 1 "$COMMIT_MSG_FILE" | tr -d '\r')
 
-# Define expected format pattern
-# Format: [PROJECT-X.Y.Z] Commit message
-PATTERN='^\[\w+-[0-9]+\.[0-9]+\.[0-9]+\] .+$'
+# Print for debugging
+echo "DEBUG: Commit message: '$COMMIT_MSG'"
 
-# Skip validation for merge commits
-if [[ $COMMIT_MSG =~ ^Merge ]]; then
+# Further simplify the regex check to avoid issues on Windows
+if echo "$COMMIT_MSG" | grep -E '^\[[A-Za-z]+-[0-9]+\.[0-9]+\.[0-9]+\]' > /dev/null; then
+  # Extract description and task ID for potential further use (optional)
+  TASK_ID=$(echo "$COMMIT_MSG" | grep -oE '[A-Za-z]+-[0-9]+\.[0-9]+\.[0-9]+')
+  DESCRIPTION=$(echo "$COMMIT_MSG" | sed -E 's/^\[[A-Za-z]+-[0-9]+\.[0-9]+\.[0-9]+\]\s+//')
+  echo "✅ Commit message format is valid!"
   exit 0
-fi
-
-# Validate the commit message
-if ! [[ $COMMIT_MSG =~ $PATTERN ]]; then
+else
   echo "❌ Invalid commit message format!"
-  echo ""
-  echo "Commit message should match the format: [PROJECT-X.Y.Z] Brief description"
-  echo ""
-  echo "Where:"
-  echo "  - PROJECT is your project identifier"
-  echo "  - X.Y.Z is the task number from todo.md"
-  echo "  - Brief description explains what the commit does"
-  echo ""
-  echo "Example: [ZENO-1.2.3] Implement user authentication"
-  echo ""
-  echo "Your commit message was:"
-  echo "$COMMIT_MSG"
-  echo ""
+  echo "Commit message must start with [PREFIX-X.Y.Z] followed by a description."
+  echo "Example: [PROJECT-1.2.3] Implement user authentication"
   exit 1
 fi
-
-# Check for minimum description length (after the task reference)
-DESCRIPTION=$(echo "$COMMIT_MSG" | sed -E 's/^\[\w+-[0-9]+\.[0-9]+\.[0-9]+\] //')
-if [ ${#DESCRIPTION} -lt 10 ]; then
-  echo "❌ Commit message description is too short!"
-  echo "Please provide a more descriptive message after the task reference."
-  exit 1
-fi
-
-# Extract task ID for validation
-TASK_ID=$(echo "$COMMIT_MSG" | grep -oE '^\[\w+-[0-9]+\.[0-9]+\.[0-9]+\]' | tr -d '[]')
-
-# Optional: Verify task exists in todo.md
-# Commented out as it may be too strict for all projects
-# if ! grep -q "$TASK_ID" todo.md; then
-#   echo "⚠️ Warning: Task ID '$TASK_ID' not found in todo.md"
-#   echo "Make sure you're referencing a valid task."
-# fi
-
-echo "✅ Commit message format is valid!"
-exit 0

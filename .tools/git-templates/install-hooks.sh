@@ -10,9 +10,8 @@ if [[ "$OS" == *"MINGW"* ]] || [[ "$OS" == *"MSYS"* ]] || [[ "$OS" == *"CYGWIN"*
   echo "🖥️ Windows detected. Using Git Bash paths..."
 fi
 
-# Define source and destination paths
+# Define hooks directory path
 HOOKS_SOURCE_DIR=".tools/git-templates/hooks"
-GIT_HOOKS_DIR=".git/hooks"
 
 # Check if we're in the right directory
 if [ ! -d "$HOOKS_SOURCE_DIR" ]; then
@@ -21,18 +20,19 @@ if [ ! -d "$HOOKS_SOURCE_DIR" ]; then
   exit 1
 fi
 
-# Ensure git hooks directory exists
-mkdir -p "$GIT_HOOKS_DIR"
-
-# Copy each hook and make executable
+# Make all hooks executable
 for HOOK_FILE in "$HOOKS_SOURCE_DIR"/*; do
   if [ -f "$HOOK_FILE" ]; then
+    chmod +x "$HOOK_FILE"
     HOOK_NAME=$(basename "$HOOK_FILE")
-    cp "$HOOK_FILE" "$GIT_HOOKS_DIR/$HOOK_NAME"
-    chmod +x "$GIT_HOOKS_DIR/$HOOK_NAME"
-    echo "✅ Installed $HOOK_NAME hook"
+    echo "✅ Made $HOOK_NAME hook executable"
   fi
 done
+
+# Set Git to use our custom hooks directory
+ABSOLUTE_HOOKS_PATH="$(pwd)/$HOOKS_SOURCE_DIR"
+git config --local core.hooksPath "$HOOKS_SOURCE_DIR"
+echo "✅ Configured Git to use hooks from: $HOOKS_SOURCE_DIR"
 
 # Set up commit message template
 git config --local commit.template ".tools/git-templates/git-commit-template.txt"

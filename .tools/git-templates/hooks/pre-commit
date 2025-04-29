@@ -68,4 +68,30 @@ else
     echo "⏩ No Jest configuration detected, skipping tests"
 fi
 
+# Get the commit message from the COMMIT_EDITMSG file
+# This is where Git stores the commit message during pre-commit
+COMMIT_MSG_FILE=".git/COMMIT_EDITMSG"
+
+if [ -f "$COMMIT_MSG_FILE" ]; then
+    COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+    echo "📝 Detected commit message: $COMMIT_MSG"
+
+    # Check if the commit message contains a task reference
+    if [[ $COMMIT_MSG =~ \[([A-Za-z]+-[0-9]+\.[0-9]+\.[0-9]+)\] ]]; then
+        echo "📝 Task reference detected in commit message. Running todo update script..."
+        "$(dirname "$0")/../update-todo.sh" "$COMMIT_MSG"
+        UPDATE_STATUS=$?
+        
+        if [ $UPDATE_STATUS -eq 0 ]; then
+            echo "✅ Todo update completed successfully."
+        else
+            echo "⚠️ Todo update encountered an issue (exit code: $UPDATE_STATUS)."
+        fi
+    else
+        echo "ℹ️ No task reference found in commit message. Todo.md not updated."
+    fi
+else
+    echo "ℹ️ No commit message file found. Todo.md not updated."
+fi
+
 exit 0

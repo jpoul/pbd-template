@@ -25,15 +25,15 @@ This document outlines a Git workflow strategy that integrates with a task-orien
 
 1. [ ] **Feature Branch Creation**
    - [ ] Create feature branch for each major task section
-   - [ ] Name branches using convention: `feature/[PROJECT]-X.Y.Z-short-description`
+   - [ ] Name branches using convention: `feature/zeno-X.Y.Z-short-description`
    - [ ] Base feature branches off the `develop` branch
 
 2. [ ] **Task-Based Commits**
    - [ ] Write tests first (following TDD)
-   - [ ] Commit tests with message: `[[PROJECT]-X.Y.Z] Add tests for [feature]`
+   - [ ] Commit tests with message: `[zeno-X.Y.Z] Add tests for [feature]`
    - [ ] Implement code to pass tests
-   - [ ] Commit implementation with message: `[[PROJECT]-X.Y.Z] Implement [feature]`
-   - [ ] Refactor if needed with message: `[[PROJECT]-X.Y.Z] Refactor [feature]`
+   - [ ] Commit implementation with message: `[zeno-X.Y.Z] Implement [feature]`
+   - [ ] Refactor if needed with message: `[zeno-X.Y.Z] Refactor [feature]`
 
 3. [ ] **Todo Management**
    - [ ] Update todo.md after completing each task by marking it as done
@@ -41,7 +41,7 @@ This document outlines a Git workflow strategy that integrates with a task-orien
 
 4. [ ] **Pull Request Process**
    - [ ] Create PR when a task section is complete
-   - [ ] Reference the specific task ID(s) completed (e.g., "Completes [PROJECT]-1.1.2")
+   - [ ] Reference the specific task ID(s) completed (e.g., "Completes zeno-1.1.2")
    - [ ] Ensure all tests pass in CI
    - [ ] Get approval before merging
 
@@ -77,7 +77,7 @@ This document outlines a Git workflow strategy that integrates with a task-orien
 ## Example Commit Message
 
 ```
-[[PROJECT]-1.1.2] Implement authentication
+[zeno-1.1.2] Implement authentication
 
 # Detailed description of changes (what and why)
 - Add authentication utility functions
@@ -85,7 +85,7 @@ This document outlines a Git workflow strategy that integrates with a task-orien
 - Update documentation with authentication flow
 
 # Reference
-Task: [PROJECT]-1.1.2
+Task: zeno-1.1.2
 Prompt: 1.2
 Tests: 5 new, all passing
 Coverage: 94%
@@ -94,9 +94,9 @@ Coverage: 94%
 ## Example Branch Naming
 
 ```
-feature/[PROJECT]-1.1.2-auth-implementation
-feature/[PROJECT]-2.3.2-signup-components
-feature/[PROJECT]-4.8.1-state-management
+feature/zeno-1.1.2-auth-implementation
+feature/zeno-2.3.2-signup-components
+feature/zeno-4.8.1-state-management
 ```
 
-Replace `[PROJECT]` with your specific project identifier throughout this document.
+Replace `zeno` with your specific project identifier throughout this document.

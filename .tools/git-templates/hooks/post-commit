@@ -1,15 +1,28 @@
 #!/bin/bash
 
-# Post-commit hook to automatically update todo.md based on commit messages
+# Post-commit hook to update todo.md based on task IDs in commit messages
 
-# Get the commit message of the most recent commit
+# Get the last commit message
 COMMIT_MSG=$(git log -1 --pretty=%B)
 
-# Check if the commit message contains a task reference
-if [[ $COMMIT_MSG =~ \[.*-[0-9]+\.[0-9]+\.[0-9]+\] ]]; then
-  # Run the todo update script
-  echo "Task reference detected in commit message. Running todo update script..."
-  ./.tools/git-templates/update-todo.sh
+echo "🔍 Checking commit message for task references: $COMMIT_MSG"
+
+# Path to update-todo.sh script
+UPDATE_SCRIPT="$(dirname "$0")/../update-todo.sh"
+
+# Check if update script exists and is executable
+if [ -f "$UPDATE_SCRIPT" ] && [ -x "$UPDATE_SCRIPT" ]; then
+    echo "📝 Running todo update script..."
+    "$UPDATE_SCRIPT" "$COMMIT_MSG"
+    EXIT_CODE=$?
+    
+    if [ $EXIT_CODE -eq 0 ]; then
+        echo "✅ Todo update completed successfully."
+    else
+        echo "⚠️ Todo update encountered an issue (exit code: $EXIT_CODE)."
+    fi
+else
+    echo "❌ Error: Update script not found or not executable at $UPDATE_SCRIPT"
 fi
 
 exit 0

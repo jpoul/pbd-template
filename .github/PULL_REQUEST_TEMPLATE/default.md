@@ -5,7 +5,7 @@
 
 ## Tasks Completed
 <!-- List the task IDs that are addressed by this PR -->
-- [ ] [PROJECT]-X.Y.Z: Task description
+- [ ] zeno-X.Y.Z: Task description
 
 ## Test Coverage
 <!-- Summary of tests added or modified -->
@@ -21,7 +21,7 @@
 
 ## Prompt References
 <!-- List the prompts that were used to guide this implementation -->
-- `docs/prompts/[PROJECT]-X.Y.Z-name.md`
+- `docs/prompts/zeno-X.Y.Z-name.md`
 
 ## Checklist
 <!-- Mark the items you've completed -->
